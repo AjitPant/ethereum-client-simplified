@@ -12,6 +12,7 @@
 #include "types.h"
 #include<vector>
 #include<stack>
+#include<deque>
 
 #include <boost/multiprecision/cpp_int.hpp>
 
@@ -20,7 +21,7 @@ class CPU {
 public:
     Memory memory;
     Storage storage;
-    std::stack<uint256_c> stack_register;
+    std::deque<uint256_c> stack_register;
 
     bool _execute_ADD();
     bool _execute_MUL();;
@@ -167,16 +168,18 @@ public:
 
 
 
-    uint256_c __extract_top();
+    uint256_c __extract_top(bool pop = true);
+    uint256_c __extract_ith(int i);
 public:
     CPU(){
         memory = Memory();
         storage = Storage();
-        stack_register = std::stack<uint256_c>();
+        stack_register = std::deque<uint256_c>();
     }
     bool execute_instruction(Instruction instruction);
     void execute_instructions(std::vector<Instruction> instructions);
 
+    bool __keccak256(const std::vector<uint8_c> &input);
 };
 
 

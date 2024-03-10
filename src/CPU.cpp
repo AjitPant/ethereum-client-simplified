@@ -3,32 +3,40 @@
 //
 
 #include "CPU.h"
-uint256_c CPU::__extract_top(){
+uint256_c CPU::__extract_top(bool pop){
     if(stack_register.empty())
         throw std::runtime_error("Stack underflow");
-    uint256_c a = stack_register.top();
-    stack_register.pop();
+    uint256_c a = stack_register.front();
+    if(pop)
+        stack_register.pop_front();
+    return a;
+}
+
+uint256_c CPU::__extract_ith(int i){
+    if(stack_register.size() < i)
+        throw std::runtime_error("Stack underflow");
+    uint256_c a = stack_register[i];
     return a;
 }
 
 bool CPU::_execute_ADD() {
     uint256_c a = __extract_top();
     uint256_c b = __extract_top();
-    stack_register.push(a + b);
+    stack_register.push_front(a + b);
     return false;
 }
 
 bool CPU::_execute_MUL() {
     uint256_c a = __extract_top();
     uint256_c b = __extract_top();
-    stack_register.push(a * b);
+    stack_register.push_front(a * b);
     return false;
 }
 
 bool CPU::_execute_SUB() {
     uint256_c a = __extract_top();
     uint256_c b = __extract_top();
-    stack_register.push(a - b);
+    stack_register.push_front(a - b);
     return false;
 }
 
@@ -40,7 +48,7 @@ bool CPU::_execute_DIV(){
         result = 0;
     else
         result = a/b;
-    stack_register.push(result);
+    stack_register.push_front(result);
     return false;
 
 }
@@ -58,7 +66,7 @@ bool CPU::_execute_MOD(){
         result = 0;
     else
         result = a%b;
-    stack_register.push(result);
+    stack_register.push_front(result);
     return false;
 }
 
@@ -76,7 +84,7 @@ bool CPU::_execute_ADDMOD(){
         result = 0;
     else
         result = (a + b) % N;
-    stack_register.push(static_cast<uint256_c>(result));
+    stack_register.push_front(static_cast<uint256_c>(result));
     return false;
 }
 
@@ -89,7 +97,7 @@ bool CPU::_execute_MULMOD(){
         result = 0;
     else
         result = (a * b) % N;
-    stack_register.push(static_cast<uint256_c>(result));
+    stack_register.push_front(static_cast<uint256_c>(result));
     return false;
 
 }
@@ -102,7 +110,7 @@ bool CPU::_execute_EXP(){
         result = 1;
     else
         result = boost::multiprecision::pow(a, static_cast<unsigned long>(b)); // [TODO] Fix this for large power
-    stack_register.push(result);
+    stack_register.push_front(result);
     return false;
 }
 
@@ -131,67 +139,67 @@ bool CPU::_execute_SIGNEXTEND(){
 bool CPU::_execute_LT(){
     uint256_c a = __extract_top();
     uint256_c b = __extract_top();
-    stack_register.push(a < b);
+    stack_register.push_front(a < b);
     return false;
 }
 
 bool CPU::_execute_GT(){
     uint256_c a = __extract_top();
     uint256_c b = __extract_top();
-    stack_register.push(a > b);
+    stack_register.push_front(a > b);
     return false;
 }
 
 bool CPU::_execute_SLT(){
     int256_c a = static_cast<int256_c>(__extract_top());
     int256_c b = static_cast<int256_c>(__extract_top());
-    stack_register.push(a < b);
+    stack_register.push_front(a < b);
     return false;
 }
 
 bool CPU::_execute_SGT(){
     int256_c a = static_cast<int256_c>(__extract_top());
     int256_c b = static_cast<int256_c>(__extract_top());
-    stack_register.push(a > b);
+    stack_register.push_front(a > b);
     return false;
 }
 
 bool CPU::_execute_EQ(){
     uint256_c a = __extract_top();
     uint256_c b = __extract_top();
-    stack_register.push(a == b);
+    stack_register.push_front(a == b);
     return false;
 }
 bool CPU::_execute_ISZERO(){
     uint256_c a = __extract_top();
-    stack_register.push(a == 0);
+    stack_register.push_front(a == 0);
     return false;
 }
 
 bool CPU::_execute_AND(){
     uint256_c a = __extract_top();
     uint256_c b = __extract_top();
-    stack_register.push(a & b);
+    stack_register.push_front(a & b);
     return false;
 }
 
 bool CPU::_execute_OR(){
     uint256_c a = __extract_top();
     uint256_c b = __extract_top();
-    stack_register.push(a | b);
+    stack_register.push_front(a | b);
     return false;
 }
 
 bool CPU::_execute_XOR(){
     uint256_c a = __extract_top();
     uint256_c b = __extract_top();
-    stack_register.push(a ^ b);
+    stack_register.push_front(a ^ b);
     return false;
 }
 
 bool CPU::_execute_NOT(){
     uint256_c a = __extract_top();
-    stack_register.push(~a);
+    stack_register.push_front(~a);
     return false;
 }
 
@@ -199,30 +207,30 @@ bool CPU::_execute_BYTE(){
     unsigned int i = static_cast<unsigned int>(__extract_top());
     uint256_c x = __extract_top();
     if(i > 31)
-        stack_register.push(0);
+        stack_register.push_front(0);
     else
-        stack_register.push((x >> (256 - 8 * i)) & 0xff);
+        stack_register.push_front((x >> (256 - 8 * i)) & 0xff);
     return false;
 }
 
 bool CPU::_execute_SHL(){
     uint256_c a = __extract_top();
     unsigned int b = static_cast<unsigned int>(__extract_top());
-    stack_register.push(a << b);
+    stack_register.push_front(a << b);
     return false;
 }
 
 bool CPU::_execute_SHR(){
     uint256_c a = __extract_top();
     unsigned int b = static_cast<unsigned int>(__extract_top());
-    stack_register.push(a >> b);
+    stack_register.push_front(a >> b);
     return false;
 }
 
 bool CPU::_execute_SAR(){
     int256_c a = static_cast<int256_c>(__extract_top());
     int b = static_cast<int>(__extract_top());
-    stack_register.push(static_cast<uint256_c>(a >> b));
+    stack_register.push_front(static_cast<uint256_c>(a >> b));
     return false;
 }
 bool CPU::__keccak256(const std::vector<uint8_c>& input){
@@ -241,7 +249,7 @@ bool CPU::_execute_SHA3(){
     for(int i = 0; i < 32; i++){
         result = (result << 8) + hash[i];
     }
-    stack_register.push(result);
+    stack_register.push_front(result);
     return false;
 }
 
@@ -427,322 +435,338 @@ bool CPU::_execute_JUMPDEST(){
 
 
 bool CPU::_execute_PUSH1(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH2(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH3(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH4(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH5(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH6(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH7(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH8(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH9(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH10(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH11(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH12(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH13(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH14(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH15(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH16(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH17(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH18(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH19(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH20(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH21(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH22(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH23(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH24(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH25(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH26(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH27(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH28(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH29(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH30(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH31(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_PUSH32(uint256_c push_value){
-    stack_register.push(push_value);
+    stack_register.push_front(push_value);
     return false;
 }
 
 bool CPU::_execute_DUP1(){
-    throw std::runtime_error("DUP1 not implemented");
+    uint256_c a = __extract_ith(0);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP2(){
-    throw std::runtime_error("DUP2 not implemented");
+    uint256_c a = __extract_ith(1);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP3(){
-    throw std::runtime_error("DUP3 not implemented");
+    uint256_c a = __extract_ith(2);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP4(){
-    throw std::runtime_error("DUP4 not implemented");
+    uint256_c a = __extract_ith(3);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP5(){
-    throw std::runtime_error("DUP5 not implemented");
+    uint256_c a = __extract_ith(4);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP6(){
-    throw std::runtime_error("DUP6 not implemented");
+    uint256_c a = __extract_ith(5);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP7(){
-    throw std::runtime_error("DUP7 not implemented");
+    uint256_c a = __extract_ith(6);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP8(){
-    throw std::runtime_error("DUP8 not implemented");
+    uint256_c a = __extract_ith(7);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP9(){
-    throw std::runtime_error("DUP9 not implemented");
+    uint256_c a = __extract_ith(8);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP10(){
-    throw std::runtime_error("DUP10 not implemented");
+    uint256_c a = __extract_ith(9);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP11(){
-    throw std::runtime_error("DUP11 not implemented");
+    uint256_c a = __extract_ith(10);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP12(){
-    throw std::runtime_error("DUP12 not implemented");
+    uint256_c a = __extract_ith(11);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP13(){
-    throw std::runtime_error("DUP13 not implemented");
+    uint256_c a = __extract_ith(12);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP14(){
-    throw std::runtime_error("DUP14 not implemented");
+    uint256_c a = __extract_ith(13);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP15(){
-    throw std::runtime_error("DUP15 not implemented");
+    uint256_c a = __extract_ith(14);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_DUP16(){
-    throw std::runtime_error("DUP16 not implemented");
+    uint256_c a = __extract_ith(15);
+    stack_register.push_front(a);
     return false;
 }
 
 bool CPU::_execute_SWAP1(){
-    throw std::runtime_error("SWAP1 not implemented");
+    swap(stack_register[0], stack_register[1]);
     return false;
 }
 
 bool CPU::_execute_SWAP2(){
-    throw std::runtime_error("SWAP2 not implemented");
+    swap(stack_register[0], stack_register[2]);
     return false;
 }
 
 bool CPU::_execute_SWAP3(){
-    throw std::runtime_error("SWAP3 not implemented");
+    swap(stack_register[0], stack_register[3]);
     return false;
 }
 
 bool CPU::_execute_SWAP4(){
-    throw std::runtime_error("SWAP4 not implemented");
+    swap(stack_register[0], stack_register[4]);
     return false;
 }
 
 bool CPU::_execute_SWAP5(){
-    throw std::runtime_error("SWAP5 not implemented");
+    swap(stack_register[0], stack_register[5]);
     return false;
 }
 
 bool CPU::_execute_SWAP6(){
-    throw std::runtime_error("SWAP6 not implemented");
+    swap(stack_register[0], stack_register[6]);
     return false;
 }
 
 bool CPU::_execute_SWAP7(){
-    throw std::runtime_error("SWAP7 not implemented");
+    swap(stack_register[0], stack_register[7]);
     return false;
 }
 
 bool CPU::_execute_SWAP8(){
-    throw std::runtime_error("SWAP8 not implemented");
+    swap(stack_register[0], stack_register[8]);
     return false;
 }
 
 bool CPU::_execute_SWAP9(){
-    throw std::runtime_error("SWAP9 not implemented");
+    swap(stack_register[0], stack_register[9]);
     return false;
 }
 
 bool CPU::_execute_SWAP10(){
-    throw std::runtime_error("SWAP10 not implemented");
+    swap(stack_register[0], stack_register[10]);
     return false;
 }
 
 bool CPU::_execute_SWAP11(){
-    throw std::runtime_error("SWAP11 not implemented");
+    swap(stack_register[0], stack_register[11]);
     return false;
 }
 
 bool CPU::_execute_SWAP12(){
-    throw std::runtime_error("SWAP12 not implemented");
+    swap(stack_register[0], stack_register[12]);
     return false;
 }
 
 bool CPU::_execute_SWAP13(){
-    throw std::runtime_error("SWAP13 not implemented");
+    swap(stack_register[0], stack_register[13]);
     return false;
 }
 
 bool CPU::_execute_SWAP14(){
-    throw std::runtime_error("SWAP14 not implemented");
+    swap(stack_register[0], stack_register[14]);
     return false;
 }
 
 bool CPU::_execute_SWAP15(){
-    throw std::runtime_error("SWAP15 not implemented");
+    swap(stack_register[0], stack_register[15]);
     return false;
 }
 
 bool CPU::_execute_SWAP16(){
-    throw std::runtime_error("SWAP16 not implemented");
+    swap(stack_register[0], stack_register[16]);
     return false;
 }
 
