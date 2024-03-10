@@ -425,163 +425,164 @@ bool CPU::_execute_JUMPDEST(){
     return false;
 }
 
-bool CPU::_execute_PUSH1(){
-    throw std::runtime_error("PUSH1 not implemented");
+
+bool CPU::_execute_PUSH1(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH2(){
-    throw std::runtime_error("PUSH2 not implemented");
+bool CPU::_execute_PUSH2(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH3(){
-    throw std::runtime_error("PUSH3 not implemented");
+bool CPU::_execute_PUSH3(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH4(){
-    throw std::runtime_error("PUSH4 not implemented");
+bool CPU::_execute_PUSH4(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH5(){
-    throw std::runtime_error("PUSH5 not implemented");
+bool CPU::_execute_PUSH5(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH6(){
-    throw std::runtime_error("PUSH6 not implemented");
+bool CPU::_execute_PUSH6(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH7(){
-    throw std::runtime_error("PUSH7 not implemented");
+bool CPU::_execute_PUSH7(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH8(){
-    throw std::runtime_error("PUSH8 not implemented");
+bool CPU::_execute_PUSH8(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH9(){
-    throw std::runtime_error("PUSH9 not implemented");
+bool CPU::_execute_PUSH9(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH10(){
-    throw std::runtime_error("PUSH10 not implemented");
+bool CPU::_execute_PUSH10(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH11(){
-    throw std::runtime_error("PUSH11 not implemented");
+bool CPU::_execute_PUSH11(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH12(){
-    throw std::runtime_error("PUSH12 not implemented");
+bool CPU::_execute_PUSH12(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH13(){
-    throw std::runtime_error("PUSH13 not implemented");
+bool CPU::_execute_PUSH13(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH14(){
-    throw std::runtime_error("PUSH14 not implemented");
+bool CPU::_execute_PUSH14(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH15(){
-    throw std::runtime_error("PUSH15 not implemented");
+bool CPU::_execute_PUSH15(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH16(){
-    throw std::runtime_error("PUSH16 not implemented");
+bool CPU::_execute_PUSH16(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH17(){
-    throw std::runtime_error("PUSH17 not implemented");
+bool CPU::_execute_PUSH17(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH18(){
-    throw std::runtime_error("PUSH18 not implemented");
+bool CPU::_execute_PUSH18(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH19(){
-    throw std::runtime_error("PUSH19 not implemented");
+bool CPU::_execute_PUSH19(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH20(){
-    throw std::runtime_error("PUSH20 not implemented");
+bool CPU::_execute_PUSH20(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH21(){
-    throw std::runtime_error("PUSH21 not implemented");
+bool CPU::_execute_PUSH21(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH22(){
-    throw std::runtime_error("PUSH22 not implemented");
+bool CPU::_execute_PUSH22(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH23(){
-    throw std::runtime_error("PUSH23 not implemented");
+bool CPU::_execute_PUSH23(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH24(){
-    throw std::runtime_error("PUSH24 not implemented");
+bool CPU::_execute_PUSH24(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH25(){
-    throw std::runtime_error("PUSH25 not implemented");
+bool CPU::_execute_PUSH25(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH26(){
-    throw std::runtime_error("PUSH26 not implemented");
+bool CPU::_execute_PUSH26(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH27(){
-    throw std::runtime_error("PUSH27 not implemented");
+bool CPU::_execute_PUSH27(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH28(){
-    throw std::runtime_error("PUSH28 not implemented");
+bool CPU::_execute_PUSH28(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH29(){
-    throw std::runtime_error("PUSH29 not implemented");
+bool CPU::_execute_PUSH29(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH30(){
-    throw std::runtime_error("PUSH30 not implemented");
+bool CPU::_execute_PUSH30(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH31(){
-    throw std::runtime_error("PUSH31 not implemented");
+bool CPU::_execute_PUSH31(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
-bool CPU::_execute_PUSH32(){
-    throw std::runtime_error("PUSH32 not implemented");
+bool CPU::_execute_PUSH32(uint256_c push_value){
+    stack_register.push(push_value);
     return false;
 }
 
@@ -1024,100 +1025,100 @@ bool CPU::execute_instruction(Instruction instruction) {
             _execute_JUMPDEST();
             break;
         case PUSH1:
-            _execute_PUSH1();
+            _execute_PUSH1(push_value);
             break;
         case PUSH2:
-            _execute_PUSH2();
+            _execute_PUSH2(push_value);
             break;
         case PUSH3:
-            _execute_PUSH3();
+            _execute_PUSH3(push_value);
             break;
         case PUSH4:
-            _execute_PUSH4();
+            _execute_PUSH4(push_value);
             break;
         case PUSH5:
-            _execute_PUSH5();
+            _execute_PUSH5(push_value);
             break;
         case PUSH6:
-            _execute_PUSH6();
+            _execute_PUSH6(push_value);
             break;
         case PUSH7:
-            _execute_PUSH7();
+            _execute_PUSH7(push_value);
             break;
         case PUSH8:
-            _execute_PUSH8();
+            _execute_PUSH8(push_value);
             break;
         case PUSH9:
-            _execute_PUSH9();
+            _execute_PUSH9(push_value);
             break;
         case PUSH10:
-            _execute_PUSH10();
+            _execute_PUSH10(push_value);
             break;
         case PUSH11:
-            _execute_PUSH11();
+            _execute_PUSH11(push_value);
             break;
         case PUSH12:
-            _execute_PUSH12();
+            _execute_PUSH12(push_value);
             break;
         case PUSH13:
-            _execute_PUSH13();
+            _execute_PUSH13(push_value);
             break;
         case PUSH14:
-            _execute_PUSH14();
+            _execute_PUSH14(push_value);
             break;
         case PUSH15:
-            _execute_PUSH15();
+            _execute_PUSH15(push_value);
             break;
         case PUSH16:
-            _execute_PUSH16();
+            _execute_PUSH16(push_value);
             break;
         case PUSH17:
-            _execute_PUSH17();
+            _execute_PUSH17(push_value);
             break;
         case PUSH18:
-            _execute_PUSH18();
+            _execute_PUSH18(push_value);
             break;
         case PUSH19:
-            _execute_PUSH19();
+            _execute_PUSH19(push_value);
             break;
         case PUSH20:
-            _execute_PUSH20();
+            _execute_PUSH20(push_value);
             break;
         case PUSH21:
-            _execute_PUSH21();
+            _execute_PUSH21(push_value);
             break;
         case PUSH22:
-            _execute_PUSH22();
+            _execute_PUSH22(push_value);
             break;
         case PUSH23:
-            _execute_PUSH23();
+            _execute_PUSH23(push_value);
             break;
         case PUSH24:
-            _execute_PUSH24();
+            _execute_PUSH24(push_value);
             break;
         case PUSH25:
-            _execute_PUSH25();
+            _execute_PUSH25(push_value);
             break;
         case PUSH26:
-            _execute_PUSH26();
+            _execute_PUSH26(push_value);
             break;
         case PUSH27:
-            _execute_PUSH27();
+            _execute_PUSH27(push_value);
             break;
         case PUSH28:
-            _execute_PUSH28();
+            _execute_PUSH28(push_value);
             break;
         case PUSH29:
-            _execute_PUSH29();
+            _execute_PUSH29(push_value);
             break;
         case PUSH30:
-            _execute_PUSH30();
+            _execute_PUSH30(push_value);
             break;
         case PUSH31:
-            _execute_PUSH31();
+            _execute_PUSH31(push_value);
             break;
         case PUSH32:
-            _execute_PUSH32();
+            _execute_PUSH32(push_value);
             break;
         case DUP1:
             _execute_DUP1();
