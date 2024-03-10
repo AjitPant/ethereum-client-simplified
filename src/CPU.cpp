@@ -3,14 +3,831 @@
 //
 
 #include "CPU.h"
+uint256_c CPU::__extract_top(){
+    if(stack_register.empty())
+        throw std::runtime_error("Stack underflow");
+    uint256_c a = stack_register.top();
+    stack_register.pop();
+    return a;
+}
+
+bool CPU::_execute_ADD() {
+    uint256_c a = __extract_top();
+    uint256_c b = __extract_top();
+    stack_register.push(a + b);
+    return false;
+}
+
+bool CPU::_execute_MUL() {
+    uint256_c a = __extract_top();
+    uint256_c b = __extract_top();
+    stack_register.push(a * b);
+    return false;
+}
+
+bool CPU::_execute_SUB() {
+    uint256_c a = __extract_top();
+    uint256_c b = __extract_top();
+    stack_register.push(a - b);
+    return false;
+}
+
+bool CPU::_execute_DIV(){
+    uint256_c a = __extract_top();
+    uint256_c b = __extract_top();
+    uint256_c result;
+    if(b == 0)
+        result = 0;
+    else
+        result = a/b;
+    stack_register.push(result);
+    return false;
+
+}
+
+bool CPU::_execute_SDIV(){
+    throw std::runtime_error("SDIV not implemented");
+    return true;
+}
+
+bool CPU::_execute_MOD(){
+    uint256_c a = __extract_top();
+    uint256_c b = __extract_top();
+    uint256_c result;
+    if(b == 0)
+        result = 0;
+    else
+        result = a%b;
+    stack_register.push(result);
+    return false;
+}
+
+bool CPU::_execute_SMOD(){
+    throw std::runtime_error("SMOD not implemented");
+    return true;
+}
+
+bool CPU::_execute_ADDMOD(){
+    uint512_c a = __extract_top();
+    uint512_c b = __extract_top();
+    uint512_c N = __extract_top();
+    uint512_c result;
+    if(N == 0)
+        result = 0;
+    else
+        result = (a + b) % N;
+    stack_register.push(static_cast<uint256_c>(result));
+    return false;
+}
+
+bool CPU::_execute_MULMOD(){
+    uint512_c a = __extract_top();
+    uint512_c b = __extract_top();
+    uint512_c N = __extract_top();
+    uint512_c result;
+    if(N == 0)
+        result = 0;
+    else
+        result = (a * b) % N;
+    stack_register.push(static_cast<uint256_c>(result));
+    return false;
+
+}
+
+bool CPU::_execute_EXP(){
+    uint256_c a = __extract_top();
+    uint256_c b = __extract_top();
+    uint256_c result;
+    if(b == 0)
+        result = 1;
+    else
+        result = boost::multiprecision::pow(a, static_cast<unsigned long>(b)); // [TODO] Fix this for large power
+    stack_register.push(result);
+    return false;
+}
+
+bool CPU::_execute_SIGNEXTEND(){
+    unsigned int b = static_cast<unsigned int>(__extract_top());
+    uint256_c x = __extract_top();
+    uint256_c result;
+    // sign extends x from (b + 1) * 8 bits to 256 bits.
+    if(b > 31)
+        result = x;
+    else{
+        uint256_c mask = 0;
+        for(int i = 0; i < b; i++){
+            mask = (mask << 8) + 0xff;
+        }
+        uint256_c sign_bit = 0x80 << (b * 8);
+        if(x & sign_bit){
+            result = x | ~mask;
+        } else{
+            result = x & mask;
+        }
+    }
+    return false;
+}
+
+bool CPU::_execute_LT(){
+    uint256_c a = __extract_top();
+    uint256_c b = __extract_top();
+    stack_register.push(a < b);
+    return false;
+}
+
+bool CPU::_execute_GT(){
+    uint256_c a = __extract_top();
+    uint256_c b = __extract_top();
+    stack_register.push(a > b);
+    return false;
+}
+
+bool CPU::_execute_SLT(){
+    int256_c a = static_cast<int256_c>(__extract_top());
+    int256_c b = static_cast<int256_c>(__extract_top());
+    stack_register.push(a < b);
+    return false;
+}
+
+bool CPU::_execute_SGT(){
+    int256_c a = static_cast<int256_c>(__extract_top());
+    int256_c b = static_cast<int256_c>(__extract_top());
+    stack_register.push(a > b);
+    return false;
+}
+
+bool CPU::_execute_EQ(){
+    uint256_c a = __extract_top();
+    uint256_c b = __extract_top();
+    stack_register.push(a == b);
+    return false;
+}
+bool CPU::_execute_ISZERO(){
+    uint256_c a = __extract_top();
+    stack_register.push(a == 0);
+    return false;
+}
+
+bool CPU::_execute_AND(){
+    uint256_c a = __extract_top();
+    uint256_c b = __extract_top();
+    stack_register.push(a & b);
+    return false;
+}
+
+bool CPU::_execute_OR(){
+    uint256_c a = __extract_top();
+    uint256_c b = __extract_top();
+    stack_register.push(a | b);
+    return false;
+}
+
+bool CPU::_execute_XOR(){
+    uint256_c a = __extract_top();
+    uint256_c b = __extract_top();
+    stack_register.push(a ^ b);
+    return false;
+}
+
+bool CPU::_execute_NOT(){
+    uint256_c a = __extract_top();
+    stack_register.push(~a);
+    return false;
+}
+
+bool CPU::_execute_BYTE(){
+    unsigned int i = static_cast<unsigned int>(__extract_top());
+    uint256_c x = __extract_top();
+    if(i > 31)
+        stack_register.push(0);
+    else
+        stack_register.push((x >> (256 - 8 * i)) & 0xff);
+    return false;
+}
+
+bool CPU::_execute_SHL(){
+    uint256_c a = __extract_top();
+    unsigned int b = static_cast<unsigned int>(__extract_top());
+    stack_register.push(a << b);
+    return false;
+}
+
+bool CPU::_execute_SHR(){
+    uint256_c a = __extract_top();
+    unsigned int b = static_cast<unsigned int>(__extract_top());
+    stack_register.push(a >> b);
+    return false;
+}
+
+bool CPU::_execute_SAR(){
+    int256_c a = static_cast<int256_c>(__extract_top());
+    int b = static_cast<int>(__extract_top());
+    stack_register.push(static_cast<uint256_c>(a >> b));
+    return false;
+}
+bool CPU::__keccak256(const std::vector<uint8_c>& input){
+    throw std::runtime_error("SHA3 not implemented");
+    return false;
+}
+bool CPU::_execute_SHA3(){
+    uint256_c offset = __extract_top();
+    uint256_c length = __extract_top();
+    std::vector<uint8_c> data;
+    for(uint256_c i = 0; i < length; i++){
+        data.push_back(memory[offset + i]);
+    }
+    std::vector<uint8_c> hash = __keccak256(data);
+    uint256_c result = 0;
+    for(int i = 0; i < 32; i++){
+        result = (result << 8) + hash[i];
+    }
+    stack_register.push(result);
+    return false;
+}
+
+bool CPU::_execute_ADDRESS(){
+    throw std::runtime_error("ADDRESS not implemented");
+    return false;
+}
+
+bool CPU::_execute_BALANCE(){
+    throw std::runtime_error("BALANCE not implemented");
+    return false;
+}
+
+bool CPU::_execute_ORIGIN(){
+    throw std::runtime_error("ORIGIN not implemented");
+    return false;
+}
+
+bool CPU::_execute_CALLER(){
+    throw std::runtime_error("CALLER not implemented");
+    return false;
+}
+
+bool CPU::_execute_CALLVALUE(){
+    throw std::runtime_error("CALLVALUE not implemented");
+    return false;
+}
+
+bool CPU::_execute_CALLDATALOAD(){
+    throw std::runtime_error("CALLDATALOAD not implemented");
+    return false;
+}
+
+bool CPU::_execute_CALLDATASIZE(){
+    throw std::runtime_error("CALLDATASIZE not implemented");
+    return false;
+}
+
+bool CPU::_execute_CALLDATACOPY(){
+    throw std::runtime_error("CALLDATACOPY not implemented");
+    return false;
+}
+
+bool CPU::_execute_CODESIZE(){
+    throw std::runtime_error("CODESIZE not implemented");
+    return false;
+}
+
+bool CPU::_execute_CODECOPY(){
+    throw std::runtime_error("CODECOPY not implemented");
+    return false;
+}
+
+bool CPU::_execute_GASPRICE(){
+    throw std::runtime_error("GASPRICE not implemented");
+    return false;
+}
+
+bool CPU::_execute_EXTCODESIZE(){
+    throw std::runtime_error("EXTCODESIZE not implemented");
+    return false;
+}
+
+bool CPU::_execute_EXTCODECOPY(){
+    throw std::runtime_error("EXTCODECOPY not implemented");
+    return false;
+}
+
+bool CPU::_execute_RETURNDATASIZE(){
+    throw std::runtime_error("RETURNDATASIZE not implemented");
+    return false;
+}
+
+bool CPU::_execute_RETURNDATACOPY(){
+    throw std::runtime_error("RETURNDATACOPY not implemented");
+    return false;
+}
+
+bool CPU::_execute_EXTCODEHASH(){
+    throw std::runtime_error("EXTCODEHASH not implemented");
+    return false;
+}
+
+bool CPU::_execute_BLOCKHASH(){
+    throw std::runtime_error("BLOCKHASH not implemented");
+    return false;
+}
+
+bool CPU::_execute_COINBASE(){
+    throw std::runtime_error("COINBASE not implemented");
+    return false;
+}
+
+bool CPU::_execute_TIMESTAMP(){
+    throw std::runtime_error("TIMESTAMP not implemented");
+    return false;
+}
+
+bool CPU::_execute_NUMBER(){
+    throw std::runtime_error("NUMBER not implemented");
+    return false;
+}
+
+bool CPU::_execute_DIFFICULTY(){
+    throw std::runtime_error("DIFFICULTY not implemented");
+    return false;
+}
+
+bool CPU::_execute_GASLIMIT(){
+    throw std::runtime_error("GASLIMIT not implemented");
+    return false;
+}
+
+bool CPU::_execute_CHAINID(){
+    throw std::runtime_error("CHAINID not implemented");
+    return false;
+}
+
+bool CPU::_execute_SELFBALANCE(){
+    throw std::runtime_error("SELFBALANCE not implemented");
+    return false;
+}
+
+bool CPU::_execute_POP(){
+    throw std::runtime_error("POP not implemented");
+    return false;
+}
+
+bool CPU::_execute_MLOAD(){
+    throw std::runtime_error("MLOAD not implemented");
+    return false;
+}
+
+bool CPU::_execute_MSTORE(){
+    throw std::runtime_error("MSTORE not implemented");
+    return false;
+}
+
+bool CPU::_execute_MSTORE8(){
+    throw std::runtime_error("MSTORE8 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SLOAD(){
+    throw std::runtime_error("SLOAD not implemented");
+    return false;
+}
+
+bool CPU::_execute_SSTORE(){
+    throw std::runtime_error("SSTORE not implemented");
+    return false;
+}
+
+bool CPU::_execute_JUMP(){
+    throw std::runtime_error("JUMP not implemented");
+    return false;
+}
+
+bool CPU::_execute_JUMPI(){
+    throw std::runtime_error("JUMPI not implemented");
+    return false;
+}
+
+bool CPU::_execute_PC(){
+    throw std::runtime_error("PC not implemented");
+    return false;
+}
+
+bool CPU::_execute_MSIZE(){
+    throw std::runtime_error("MSIZE not implemented");
+    return false;
+}
+
+bool CPU::_execute_GAS(){
+    throw std::runtime_error("GAS not implemented");
+    return false;
+}
+
+bool CPU::_execute_JUMPDEST(){
+    throw std::runtime_error("JUMPDEST not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH1(){
+    throw std::runtime_error("PUSH1 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH2(){
+    throw std::runtime_error("PUSH2 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH3(){
+    throw std::runtime_error("PUSH3 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH4(){
+    throw std::runtime_error("PUSH4 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH5(){
+    throw std::runtime_error("PUSH5 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH6(){
+    throw std::runtime_error("PUSH6 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH7(){
+    throw std::runtime_error("PUSH7 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH8(){
+    throw std::runtime_error("PUSH8 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH9(){
+    throw std::runtime_error("PUSH9 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH10(){
+    throw std::runtime_error("PUSH10 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH11(){
+    throw std::runtime_error("PUSH11 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH12(){
+    throw std::runtime_error("PUSH12 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH13(){
+    throw std::runtime_error("PUSH13 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH14(){
+    throw std::runtime_error("PUSH14 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH15(){
+    throw std::runtime_error("PUSH15 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH16(){
+    throw std::runtime_error("PUSH16 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH17(){
+    throw std::runtime_error("PUSH17 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH18(){
+    throw std::runtime_error("PUSH18 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH19(){
+    throw std::runtime_error("PUSH19 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH20(){
+    throw std::runtime_error("PUSH20 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH21(){
+    throw std::runtime_error("PUSH21 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH22(){
+    throw std::runtime_error("PUSH22 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH23(){
+    throw std::runtime_error("PUSH23 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH24(){
+    throw std::runtime_error("PUSH24 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH25(){
+    throw std::runtime_error("PUSH25 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH26(){
+    throw std::runtime_error("PUSH26 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH27(){
+    throw std::runtime_error("PUSH27 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH28(){
+    throw std::runtime_error("PUSH28 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH29(){
+    throw std::runtime_error("PUSH29 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH30(){
+    throw std::runtime_error("PUSH30 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH31(){
+    throw std::runtime_error("PUSH31 not implemented");
+    return false;
+}
+
+bool CPU::_execute_PUSH32(){
+    throw std::runtime_error("PUSH32 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP1(){
+    throw std::runtime_error("DUP1 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP2(){
+    throw std::runtime_error("DUP2 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP3(){
+    throw std::runtime_error("DUP3 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP4(){
+    throw std::runtime_error("DUP4 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP5(){
+    throw std::runtime_error("DUP5 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP6(){
+    throw std::runtime_error("DUP6 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP7(){
+    throw std::runtime_error("DUP7 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP8(){
+    throw std::runtime_error("DUP8 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP9(){
+    throw std::runtime_error("DUP9 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP10(){
+    throw std::runtime_error("DUP10 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP11(){
+    throw std::runtime_error("DUP11 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP12(){
+    throw std::runtime_error("DUP12 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP13(){
+    throw std::runtime_error("DUP13 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP14(){
+    throw std::runtime_error("DUP14 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP15(){
+    throw std::runtime_error("DUP15 not implemented");
+    return false;
+}
+
+bool CPU::_execute_DUP16(){
+    throw std::runtime_error("DUP16 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP1(){
+    throw std::runtime_error("SWAP1 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP2(){
+    throw std::runtime_error("SWAP2 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP3(){
+    throw std::runtime_error("SWAP3 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP4(){
+    throw std::runtime_error("SWAP4 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP5(){
+    throw std::runtime_error("SWAP5 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP6(){
+    throw std::runtime_error("SWAP6 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP7(){
+    throw std::runtime_error("SWAP7 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP8(){
+    throw std::runtime_error("SWAP8 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP9(){
+    throw std::runtime_error("SWAP9 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP10(){
+    throw std::runtime_error("SWAP10 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP11(){
+    throw std::runtime_error("SWAP11 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP12(){
+    throw std::runtime_error("SWAP12 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP13(){
+    throw std::runtime_error("SWAP13 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP14(){
+    throw std::runtime_error("SWAP14 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP15(){
+    throw std::runtime_error("SWAP15 not implemented");
+    return false;
+}
+
+bool CPU::_execute_SWAP16(){
+    throw std::runtime_error("SWAP16 not implemented");
+    return false;
+}
+
+bool CPU::_execute_LOG0(){
+    throw std::runtime_error("LOG0 not implemented");
+    return false;
+}
+
+bool CPU::_execute_LOG1(){
+    throw std::runtime_error("LOG1 not implemented");
+    return false;
+}
+
+bool CPU::_execute_LOG2(){
+    throw std::runtime_error("LOG2 not implemented");
+    return false;
+}
+
+bool CPU::_execute_LOG3(){
+    throw std::runtime_error("LOG3 not implemented");
+    return false;
+}
+
+bool CPU::_execute_LOG4(){
+    throw std::runtime_error("LOG4 not implemented");
+    return false;
+}
+
+bool CPU::_execute_CREATE(){
+    throw std::runtime_error("CREATE not implemented");
+    return false;
+}
+
+bool CPU::_execute_CALL(){
+    throw std::runtime_error("CALL not implemented");
+    return false;
+}
+
+bool CPU::_execute_CALLCODE(){
+    throw std::runtime_error("CALLCODE not implemented");
+    return false;
+}
+
+bool CPU::_execute_RETURN(){
+    throw std::runtime_error("RETURN not implemented");
+    return false;
+}
+
+bool CPU::_execute_DELEGATECALL(){
+    throw std::runtime_error("DELEGATECALL not implemented");
+    return false;
+}
+
+bool CPU::_execute_CREATE2(){
+    throw std::runtime_error("CREATE2 not implemented");
+    return false;
+}
+
+bool CPU::_execute_STATICCALL(){
+    throw std::runtime_error("STATICCALL not implemented");
+    return false;
+}
+
+bool CPU::_execute_REVERT(){
+    throw std::runtime_error("REVERT not implemented");
+    return false;
+}
+
+bool CPU::_execute_INVALID(){
+    throw std::runtime_error("INVALID not implemented");
+    return false;
+}
+
+bool CPU::_execute_SELFDESTRUCT(){
+    throw std::runtime_error("SELFDESTRUCT not implemented");
+    return false;
+}
+
+
+
+
+
 
 bool CPU::execute_instruction(Instruction instruction) {
     Bytecodes opcode = instruction.opcode;
     uint256_c push_value = instruction.push_value;
-
-    uint256_c a;
-    uint256_c b;
-    uint256_c N;
 
     switch(opcode){
         case STOP:
@@ -18,442 +835,430 @@ bool CPU::execute_instruction(Instruction instruction) {
             return true;
             break;
         case ADD:
-            if(stack_register.size() < 2)
-                throw std::runtime_error("Stack underflow");
-            a = stack_register.top();
-            stack_register.pop();
-            b = stack_register.top();
-            stack_register.pop();
-            stack_register.push(a + b);
+            _execute_ADD();
             break;
         case MUL:
-            throw std::runtime_error("MUL opcode not implemented");
+            _execute_MUL();;
             break;
         case SUB:
-            throw std::runtime_error("SUB opcode not implemented");
+            _execute_SUB();
             break;
         case DIV:
-            throw std::runtime_error("DIV opcode not implemented");
+            _execute_DIV();
             break;
         case SDIV:
-            throw std::runtime_error("SDIV opcode not implemented");
+            _execute_SDIV();
             break;
         case MOD:
-            throw std::runtime_error("MOD opcode not implemented");
+            _execute_MOD();
             break;
         case SMOD:
-            throw std::runtime_error("SMOD opcode not implemented");
+            _execute_SMOD();
             break;
         case ADDMOD:
-            throw std::runtime_error("ADDMOD opcode not implemented");
+            _execute_ADDMOD();
             break;
         case MULMOD:
-            throw std::runtime_error("MULMOD opcode not implemented");
+            _execute_MULMOD();
             break;
         case EXP:
-            throw std::runtime_error("EXP opcode not implemented");
+            _execute_EXP();
             break;
         case SIGNEXTEND:
-            throw std::runtime_error("SIGNEXTEND opcode not implemented");
+            _execute_SIGNEXTEND();
             break;
         case LT:
-            throw std::runtime_error("LT opcode not implemented");
+            _execute_LT();
             break;
         case GT:
-            throw std::runtime_error("GT opcode not implemented");
+            _execute_GT();
             break;
         case SLT:
-            throw std::runtime_error("SLT opcode not implemented");
+            _execute_SLT();
             break;
         case SGT:
-            throw std::runtime_error("SGT opcode not implemented");
+            _execute_SGT();
             break;
         case EQ:
-            throw std::runtime_error("EQ opcode not implemented");
+            _execute_EQ();
             break;
         case ISZERO:
-            throw std::runtime_error("ISZERO opcode not implemented");
+            _execute_ISZERO();
             break;
         case AND:
-            throw std::runtime_error("AND opcode not implemented");
+            _execute_AND();
             break;
         case OR:
-            throw std::runtime_error("OR opcode not implemented");
+            _execute_OR();
             break;
         case XOR:
-            throw std::runtime_error("XOR opcode not implemented");
+            _execute_XOR();
             break;
         case NOT:
-            throw std::runtime_error("NOT opcode not implemented");
+            _execute_NOT();
             break;
         case BYTE:
-            throw std::runtime_error("BYTE opcode not implemented");
+            _execute_BYTE();
             break;
         case SHL:
-            throw std::runtime_error("SHL opcode not implemented");
+            _execute_SHL();
             break;
         case SHR:
-            throw std::runtime_error("SHR opcode not implemented");
+            _execute_SHR();
             break;
         case SAR:
-            throw std::runtime_error("SAR opcode not implemented");
+            _execute_SAR();
             break;
         case SHA3:
-            throw std::runtime_error("SHA3 opcode not implemented");
+            _execute_SHA3();
             break;
         case ADDRESS:
-            throw std::runtime_error("ADDRESS opcode not implemented");
+            _execute_ADDRESS();
             break;
         case BALANCE:
-            throw std::runtime_error("BALANCE opcode not implemented");
+            _execute_BALANCE();
             break;
         case ORIGIN:
-            throw std::runtime_error("ORIGIN opcode not implemented");
+            _execute_ORIGIN();
             break;
         case CALLER:
-            throw std::runtime_error("CALLER opcode not implemented");
+            _execute_CALLER();
             break;
         case CALLVALUE:
-            throw std::runtime_error("CALLVALUE opcode not implemented");
+            _execute_CALLVALUE();
             break;
         case CALLDATALOAD:
-            throw std::runtime_error("CALLDATALOAD opcode not implemented");
+            _execute_CALLDATALOAD();
             break;
         case CALLDATASIZE:
-            throw std::runtime_error("CALLDATASIZE opcode not implemented");
+            _execute_CALLDATASIZE();
             break;
         case CALLDATACOPY:
-            throw std::runtime_error("CALLDATACOPY opcode not implemented");
+            _execute_CALLDATACOPY();
             break;
         case CODESIZE:
-            throw std::runtime_error("CODESIZE opcode not implemented");
+            _execute_CODESIZE();
             break;
         case CODECOPY:
-            throw std::runtime_error("CODECOPY opcode not implemented");
+            _execute_CODECOPY();
             break;
         case GASPRICE:
-            throw std::runtime_error("GASPRICE opcode not implemented");
+            _execute_GASPRICE();
             break;
         case EXTCODESIZE:
-            throw std::runtime_error("EXTCODESIZE opcode not implemented");
+            _execute_EXTCODESIZE();
             break;
         case EXTCODECOPY:
-            throw std::runtime_error("EXTCODECOPY opcode not implemented");
+            _execute_EXTCODECOPY();
             break;
         case RETURNDATASIZE:
-            throw std::runtime_error("RETURNDATASIZE opcode not implemented");
+            _execute_RETURNDATASIZE();
             break;
         case RETURNDATACOPY:
-            throw std::runtime_error("RETURNDATACOPY opcode not implemented");
+            _execute_RETURNDATACOPY();
             break;
         case EXTCODEHASH:
-            throw std::runtime_error("EXTCODEHASH opcode not implemented");
+            _execute_EXTCODEHASH();
             break;
         case BLOCKHASH:
-            throw std::runtime_error("BLOCKHASH opcode not implemented");
+            _execute_BLOCKHASH();
             break;
         case COINBASE:
-            throw std::runtime_error("COINBASE opcode not implemented");
+            _execute_COINBASE();
             break;
         case TIMESTAMP:
-            throw std::runtime_error("TIMESTAMP opcode not implemented");
+            _execute_TIMESTAMP();
             break;
         case NUMBER:
-            throw std::runtime_error("NUMBER opcode not implemented");
+            _execute_NUMBER();
             break;
         case DIFFICULTY:
-            throw std::runtime_error("DIFFICULTY opcode not implemented");
+            _execute_DIFFICULTY();
             break;
         case GASLIMIT:
-            throw std::runtime_error("GASLIMIT opcode not implemented");
+            _execute_GASLIMIT();
             break;
         case CHAINID:
-            throw std::runtime_error("CHAINID opcode not implemented");
+            _execute_CHAINID();
             break;
         case SELFBALANCE:
-            throw std::runtime_error("SELFBALANCE opcode not implemented");
+            _execute_SELFBALANCE();
             break;
         case BASEFEE:
-            throw std::runtime_error("BASEFEE opcode not implemented");
+            _execute_BASEFEE();
             break;
         case POP:
-            throw std::runtime_error("POP opcode not implemented");
+            _execute_POP();
             break;
         case MLOAD:
-            throw std::runtime_error("MLOAD opcode not implemented");
+            _execute_MLOAD();
             break;
         case MSTORE:
-            throw std::runtime_error("MSTORE opcode not implemented");
+            _execute_MSTORE();
             break;
         case MSTORE8:
-            throw std::runtime_error("MSTORE8 opcode not implemented");
+            _execute_MSTORE8();
             break;
         case SLOAD:
-            throw std::runtime_error("SLOAD opcode not implemented");
+            _execute_SLOAD();
             break;
         case SSTORE:
-            if(stack_register.size() < 2)
-                throw std::runtime_error("Stack underflow");
-            a = stack_register.top();
-            stack_register.pop();
-            b = stack_register.top();
-            stack_register.pop();
-            storage[a] = b;
+            _execute_SSTORE();
             break;
         case JUMP:
-            throw std::runtime_error("JUMP opcode not implemented");
+            _execute_JUMP();
             break;
         case JUMPI:
-            throw std::runtime_error("JUMPI opcode not implemented");
+            _execute_JUMPI();
             break;
         case PC:
-            throw std::runtime_error("PC opcode not implemented");
+            _execute_PC();
             break;
         case MSIZE:
-            throw std::runtime_error("MSIZE opcode not implemented");
+            _execute_MSIZE();
             break;
         case GAS:
-            throw std::runtime_error("GAS opcode not implemented");
+            _execute_GAS();
             break;
         case JUMPDEST:
-            throw std::runtime_error("JUMPDEST opcode not implemented");
+            _execute_JUMPDEST();
             break;
         case PUSH1:
-            stack_register.push(push_value);
+            _execute_PUSH1();
             break;
         case PUSH2:
-            throw std::runtime_error("PUSH2 opcode not implemented");
+            _execute_PUSH2();
             break;
         case PUSH3:
-            throw std::runtime_error("PUSH3 opcode not implemented");
+            _execute_PUSH3();
             break;
         case PUSH4:
-            throw std::runtime_error("PUSH4 opcode not implemented");
+            _execute_PUSH4();
             break;
         case PUSH5:
-            throw std::runtime_error("PUSH5 opcode not implemented");
+            _execute_PUSH5();
             break;
         case PUSH6:
-            throw std::runtime_error("PUSH6 opcode not implemented");
+            _execute_PUSH6();
             break;
         case PUSH7:
-            throw std::runtime_error("PUSH7 opcode not implemented");
+            _execute_PUSH7();
             break;
         case PUSH8:
-            throw std::runtime_error("PUSH8 opcode not implemented");
+            _execute_PUSH8();
             break;
         case PUSH9:
-            throw std::runtime_error("PUSH9 opcode not implemented");
+            _execute_PUSH9();
             break;
         case PUSH10:
-            throw std::runtime_error("PUSH10 opcode not implemented");
+            _execute_PUSH10();
             break;
         case PUSH11:
-            throw std::runtime_error("PUSH11 opcode not implemented");
+            _execute_PUSH11();
             break;
         case PUSH12:
-            throw std::runtime_error("PUSH12 opcode not implemented");
+            _execute_PUSH12();
             break;
         case PUSH13:
-            throw std::runtime_error("PUSH13 opcode not implemented");
+            _execute_PUSH13();
             break;
         case PUSH14:
-            throw std::runtime_error("PUSH14 opcode not implemented");
+            _execute_PUSH14();
             break;
         case PUSH15:
-            throw std::runtime_error("PUSH15 opcode not implemented");
+            _execute_PUSH15();
             break;
         case PUSH16:
-            throw std::runtime_error("PUSH16 opcode not implemented");
+            _execute_PUSH16();
             break;
         case PUSH17:
-            throw std::runtime_error("PUSH17 opcode not implemented");
+            _execute_PUSH17();
             break;
         case PUSH18:
-            throw std::runtime_error("PUSH18 opcode not implemented");
+            _execute_PUSH18();
             break;
         case PUSH19:
-            throw std::runtime_error("PUSH19 opcode not implemented");
+            _execute_PUSH19();
             break;
         case PUSH20:
-            throw std::runtime_error("PUSH20 opcode not implemented");
+            _execute_PUSH20();
             break;
         case PUSH21:
-            throw std::runtime_error("PUSH21 opcode not implemented");
+            _execute_PUSH21();
             break;
         case PUSH22:
-            throw std::runtime_error("PUSH22 opcode not implemented");
+            _execute_PUSH22();
             break;
         case PUSH23:
-            throw std::runtime_error("PUSH23 opcode not implemented");
+            _execute_PUSH23();
             break;
         case PUSH24:
-            throw std::runtime_error("PUSH24 opcode not implemented");
+            _execute_PUSH24();
             break;
         case PUSH25:
-            throw std::runtime_error("PUSH25 opcode not implemented");
+            _execute_PUSH25();
             break;
         case PUSH26:
-            throw std::runtime_error("PUSH26 opcode not implemented");
+            _execute_PUSH26();
             break;
         case PUSH27:
-            throw std::runtime_error("PUSH27 opcode not implemented");
+            _execute_PUSH27();
             break;
         case PUSH28:
-            throw std::runtime_error("PUSH28 opcode not implemented");
+            _execute_PUSH28();
             break;
         case PUSH29:
-            throw std::runtime_error("PUSH29 opcode not implemented");
+            _execute_PUSH29();
             break;
         case PUSH30:
-            throw std::runtime_error("PUSH30 opcode not implemented");
+            _execute_PUSH30();
             break;
         case PUSH31:
-            throw std::runtime_error("PUSH31 opcode not implemented");
+            _execute_PUSH31();
             break;
         case PUSH32:
-            throw std::runtime_error("PUSH32 opcode not implemented");
+            _execute_PUSH32();
             break;
         case DUP1:
-            throw std::runtime_error("DUP1 opcode not implemented");
+            _execute_DUP1();
             break;
         case DUP2:
-            throw std::runtime_error("DUP2 opcode not implemented");
+            _execute_DUP2();
             break;
         case DUP3:
-            throw std::runtime_error("DUP3 opcode not implemented");
+            _execute_DUP3();
             break;
         case DUP4:
-            throw std::runtime_error("DUP4 opcode not implemented");
+            _execute_DUP4();
             break;
         case DUP5:
-            throw std::runtime_error("DUP5 opcode not implemented");
+            _execute_DUP5();
             break;
         case DUP6:
-            throw std::runtime_error("DUP6 opcode not implemented");
+            _execute_DUP6();
             break;
         case DUP7:
-            throw std::runtime_error("DUP7 opcode not implemented");
+            _execute_DUP7();
             break;
         case DUP8:
-            throw std::runtime_error("DUP8 opcode not implemented");
+            _execute_DUP8();
             break;
         case DUP9:
-            throw std::runtime_error("DUP9 opcode not implemented");
+            _execute_DUP9();
             break;
         case DUP10:
-            throw std::runtime_error("DUP10 opcode not implemented");
+            _execute_DUP10();
             break;
         case DUP11:
-            throw std::runtime_error("DUP11 opcode not implemented");
+            _execute_DUP11();
             break;
         case DUP12:
-            throw std::runtime_error("DUP12 opcode not implemented");
+            _execute_DUP12();
             break;
         case DUP13:
-            throw std::runtime_error("DUP13 opcode not implemented");
+            _execute_DUP13();
             break;
         case DUP14:
-            throw std::runtime_error("DUP14 opcode not implemented");
+            _execute_DUP14();
             break;
         case DUP15:
-            throw std::runtime_error("DUP15 opcode not implemented");
+            _execute_DUP15();
             break;
         case DUP16:
-            throw std::runtime_error("DUP16 opcode not implemented");
+            _execute_DUP16();
             break;
         case SWAP1:
-            throw std::runtime_error("SWAP1 opcode not implemented");
+            _execute_SWAP1();
             break;
         case SWAP2:
-            throw std::runtime_error("SWAP2 opcode not implemented");
+            _execute_SWAP2();
             break;
         case SWAP3:
-            throw std::runtime_error("SWAP3 opcode not implemented");
+            _execute_SWAP3();
             break;
         case SWAP4:
-            throw std::runtime_error("SWAP4 opcode not implemented");
+            _execute_SWAP4();
             break;
         case SWAP5:
-            throw std::runtime_error("SWAP5 opcode not implemented");
+            _execute_SWAP5();
             break;
         case SWAP6:
-            throw std::runtime_error("SWAP6 opcode not implemented");
+            _execute_SWAP6();
             break;
         case SWAP7:
-            throw std::runtime_error("SWAP7 opcode not implemented");
+            _execute_SWAP7();
             break;
         case SWAP8:
-            throw std::runtime_error("SWAP8 opcode not implemented");
+            _execute_SWAP8();
             break;
         case SWAP9:
-            throw std::runtime_error("SWAP9 opcode not implemented");
+            _execute_SWAP9();
             break;
         case SWAP10:
-            throw std::runtime_error("SWAP10 opcode not implemented");
+            _execute_SWAP10();
             break;
         case SWAP11:
-            throw std::runtime_error("SWAP11 opcode not implemented");
+            _execute_SWAP11();
             break;
         case SWAP12:
-            throw std::runtime_error("SWAP12 opcode not implemented");
+            _execute_SWAP12();
             break;
         case SWAP13:
-            throw std::runtime_error("SWAP13 opcode not implemented");
+            _execute_SWAP13();
             break;
         case SWAP14:
-            throw std::runtime_error("SWAP14 opcode not implemented");
+            _execute_SWAP14();
             break;
         case SWAP15:
-            throw std::runtime_error("SWAP15 opcode not implemented");
+            _execute_SWAP15();
             break;
         case SWAP16:
-            throw std::runtime_error("SWAP16 opcode not implemented");
+            _execute_SWAP16();
             break;
         case LOG0:
-            throw std::runtime_error("LOG0 opcode not implemented");
+            _execute_LOG0();
             break;
         case LOG1:
-            throw std::runtime_error("LOG1 opcode not implemented");
+            _execute_LOG1();
             break;
         case LOG2:
-            throw std::runtime_error("LOG2 opcode not implemented");
+            _execute_LOG2();
             break;
         case LOG3:
-            throw std::runtime_error("LOG3 opcode not implemented");
+            _execute_LOG3();
             break;
         case LOG4:
-            throw std::runtime_error("LOG4 opcode not implemented");
+            _execute_LOG4();
             break;
         case CREATE:
-            throw std::runtime_error("CREATE opcode not implemented");
+            _execute_CREATE();
             break;
         case CALL:
-            throw std::runtime_error("CALL opcode not implemented");
+            _execute_CALL();
             break;
         case CALLCODE:
-            throw std::runtime_error("CALLCODE opcode not implemented");
+            _execute_CALLCODE();
             break;
         case RETURN:
-            throw std::runtime_error("RETURN opcode not implemented");
+            _execute_RETURN();
             break;
         case DELEGATECALL:
-            throw std::runtime_error("DELEGATECALL opcode not implemented");
+            _execute_DELEGATECALL();
             break;
         case CREATE2:
-            throw std::runtime_error("CREATE2 opcode not implemented");
+            _execute_CREATE2();
             break;
         case STATICCALL:
-            throw std::runtime_error("STATICCALL opcode not implemented");
+            _execute_STATICCALL();
             break;
         case REVERT:
-            throw std::runtime_error("REVERT opcode not implemented");
+            _execute_REVERT();
             break;
         case INVALID:
-            throw std::runtime_error("INVALID opcode not implemented");
+            _execute_INVALID();
             break;
         case SELFDESTRUCT:
-            throw std::runtime_error("SELFDESTRUCT opcode not implemented");
+            _execute_SELFDESTRUCT();
             break;
 
     }

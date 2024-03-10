@@ -40,7 +40,9 @@ using uint232_c = boost::multiprecision::number<boost::multiprecision::cpp_int_b
 using uint240_c = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<240, 240, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
 using uint248_c = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<248, 248, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
 using uint256_c = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<256, 256, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
+using uint512_c = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<512, 512, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
 
+using int256_c = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<512, 512, boost::multiprecision::signed_magnitude, boost::multiprecision::unchecked, void>>;
 
 
 #endif //ETHEREUM_CLIENT_SIMPLIFIED_TYPES_H
